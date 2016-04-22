@@ -46,7 +46,15 @@ defmodule Swoosh.Adapters.SMTP do
     [email.to, email.cc, email.bcc]
     |> Enum.concat()
     |> Enum.map(fn {_name, address} -> address end)
-    |> Enum.uniq
+    |> Enum.uniq()
+    |> add_recipient_dsn(email)
+  end
+
+  defp add_recipient_dsn(recipient, email) do
+    case email.provider_options[:dsn] do
+      nil -> recipient
+      dsn -> "#{recipient} NOTIFY=#{dsn} ORCPT=rfc822;#{recipient}"
+    end
   end
 
   @doc false
